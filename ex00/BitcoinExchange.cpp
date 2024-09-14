@@ -62,23 +62,49 @@ void BitcoinExchange::_init(const std::string &filename) {
 }
 
 /**
- * @brief Converts a string date to a time_t object.
+ * @brief Converts a string date to a time_t object and checks for validity.
  * @param date Date string in the format YYYY-MM-DD.
- * @return A time_t object representing the date.
+ * @return A time_t object representing the date, throws if the date is invalid.
  */
 std::time_t BitcoinExchange::parseDate(const std::string &date) const {
 	std::tm tm = {};
 	std::istringstream ss(date);
 
-	ss >> tm.tm_year >> tm.tm_mon >> tm.tm_mday;
+	// To verify correct delimiters '-' in the date string
+	char delimiter1, delimiter2;
+	int year, month, day;
+
+	ss >> year >> delimiter1 >> month >> delimiter2 >> day;
+
+	// Verify correct date format and delimiters
+	if (ss.fail() || delimiter1 != '-' || delimiter2 != '-' || !ss.eof()) {
+
+		// Skip any whitespace characters
+		ss >> std::ws;
+
+		if (!ss.eof()) {
+			throw std::runtime_error("Invalid date format: " + date);
+		}
+	}
 
 	// Adjust year since tm_year counts years since 1900
-	tm.tm_year -= 1900;
+	tm.tm_year = year - 1900;
 
 	// Adjust month from 1-12 to 0-11
-	tm.tm_mon -= 1;
+	tm.tm_mon = month - 1;
+	tm.tm_mday = day;
 
-	return std::mktime(&tm);
+	// Validate tm date
+	if (tm.tm_mon < 0 || tm.tm_mon > 11 || tm.tm_mday < 1 || tm.tm_mday > 31) {
+		throw std::runtime_error("Invalid date values: " + date);
+	}
+
+	std::time_t result = std::mktime(&tm);
+	if (result == -1) {
+		throw std::runtime_error("Invalid date conversion: " + date);
+	}
+
+	return result;
 }
 
 /**
@@ -140,6 +166,7 @@ void BitcoinExchange::run(const std::string &inputFilename) {
  */
 double BitcoinExchange::getRate(const std::string &date) const {
 	std::map<time_t, double>::const_iterator it = _db.lower_bound(parseDate(date));
+
 	if (it != _db.begin()) {
 		--it;
 	} else {
