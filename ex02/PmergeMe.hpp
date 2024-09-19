@@ -22,13 +22,29 @@
 /**
  * @brief Converts a string to an unsigned 32-bit integer (uint32_t).
  *
- * This function takes a string and converts it to an unsigned integer, while performing
- * error checks for invalid inputs.
+ * This function converts a given string to a 32-bit unsigned integer.
+ * It performs error checking to ensure the input string only contains numeric characters
+ * and that the converted value is within the range of uint32_t. If the string contains invalid characters
+ * or the value exceeds the range of uint32_t, it throws an appropriate exception.
  *
- * @param str String to be converted.
- * @return The converted unsigned integer.
+ * @param str A C-style string to be converted to an unsigned integer.
+ * @return The converted unsigned integer (uint32_t).
+ * @throws std::invalid_argument If the string contains non-numeric characters or the conversion fails.
+ * @throws std::overflow_error If the number exceeds the range of uint32_t.
  */
 uint32_t str_to_uint(const char* str);
+
+/**
+ * @brief Generates the Jacobstal sequence up to the nth element.
+ *
+ * This function generates the Jacobstal sequence up to the nth element.
+ * The Jacobstal sequence is a sequence of integers where each element is the sum of
+ * the two preceding elements multiplied by two. The first two elements are 0 and 1.
+ *
+ * @param n The number of elements to generate in the Jacobstal sequence.
+ * @return A vector containing the Jacobstal sequence up to the nth element.
+ */
+std::vector <size_t> jacobstal_sequence(size_t n);
 
 /**
  * @brief Implements the Ford-Johnson sorting algorithm (Merge-Insertion Sort) for std::vector.
