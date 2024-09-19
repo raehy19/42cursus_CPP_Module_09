@@ -13,9 +13,19 @@
 #include "BitcoinExchange.hpp"
 #include <fstream>
 #include <sstream>
-#include <stdexcept>
 #include <iostream>
-#include <iomanip>
+
+/**
+ * @brief Trims leading and trailing whitespace from a string.
+ * @param str The string to trim.
+ * @return The trimmed string.
+ */
+std::string trim(const std::string &str) {
+	std::size_t first = str.find_first_not_of(' ');
+	std::size_t last = str.find_last_not_of(' ');
+	return (first == std::string::npos || last == std::string::npos) ? "" : str.substr(first, last - first + 1);
+}
+
 
 /**
  * @brief Constructor for BitcoinExchange.
@@ -121,7 +131,8 @@ void BitcoinExchange::run(const std::string &inputFilename) {
 		throw std::runtime_error("Could not open file: " + inputFilename);
 	}
 
-	std::string line, date;
+	std::string line;
+	std::string date;
 	double value;
 
 	// Skip the header
@@ -148,6 +159,8 @@ void BitcoinExchange::run(const std::string &inputFilename) {
 		}
 
 		try {
+			date = trim(date);
+
 			double rate = getRate(date);
 
 			std::cout << date << " => " << value << " = " << std::fixed << std::setprecision(2) << (value * rate)
@@ -165,13 +178,17 @@ void BitcoinExchange::run(const std::string &inputFilename) {
  * @return The exchange rate as a double.
  */
 double BitcoinExchange::getRate(const std::string &date) const {
-	std::map<time_t, double>::const_iterator it = _db.lower_bound(parseDate(date));
+	std::time_t parsedDate = parseDate(date);
+	std::map<time_t, double>::const_iterator it = _db.lower_bound(parsedDate);
 
-	if (it != _db.begin()) {
-		--it;
-	} else {
-		throw std::runtime_error("No rate available before date: " + date);
+	if (it == _db.end() || (it->first != parsedDate)) {
+		if (it != _db.begin()) {
+			--it;
+		} else {
+			throw std::runtime_error("No rate available before date: " + date);
+		}
 	}
+
 	return it->second;
 }
 
