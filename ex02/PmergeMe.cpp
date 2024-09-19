@@ -46,34 +46,23 @@ uint32_t str_to_uint(const char *str) {
 
 
 /**
- * @brief Generates the Jacobstal sequence up to the nth element.
+ * @brief Generates an Jacobstal sequence for insertion.
  *
- * This function generates the Jacobstal sequence up to the nth element.
- * The Jacobstal sequence is a sequence of integers where each element is the sum of
- * the two preceding elements multiplied by two. The first two elements are 0 and 1.
+ * This function generates a Jacobstal insertion sequence for the Ford-Johnson algorithm.
  *
- * @param n The number of elements to generate in the Jacobstal sequence.
- * @return A vector containing the Jacobstal sequence up to the nth element.
+ * @param left The left index of the sequence.
+ * @param right The right index of the sequence.
+ * @param sequence The vector to store the generated sequence.
  */
-std::vector <size_t> jacobstal_sequence(size_t n) {
-	std::vector <size_t> jacobstal;
-	size_t j0 = 0;
-	size_t j1 = 1;
-
-	// Generate the Jacobstal sequence.
-	jacobstal.push_back(j0);
-	if (n > 1) {
-		jacobstal.push_back(j1);
+void generate_insertion_sequence(size_t left, size_t right, std::vector<size_t> &sequence) {
+	if (left > right) return;
+	size_t mid = left + (right - left) / 2;
+	sequence.push_back(mid);
+	if (mid > 0) {
+		generate_insertion_sequence(left, mid - 1, sequence);
 	}
-
-	// Calculate the remaining elements of the sequence.
-	for (size_t i = 2; i < n; i++) {
-		jacobstal.push_back(jacobstal[i - 1] + 2 * jacobstal[i - 2]);
-	}
-
-	return jacobstal;
+	generate_insertion_sequence(mid + 1, right, sequence);
 }
-
 
 /**
  * @brief Implements the Ford-Johnson sorting algorithm (Merge-Insertion Sort) for std::vector.
@@ -96,11 +85,7 @@ void ford_johnson(std::vector <uint32_t> &arr) {
 
 	// Check if the vector has an odd size.
 	if (arr.size() % 2) {
-
-		// Save the last element as the straggler.
 		straggler.push_back(arr.back());
-
-		// Remove it from the original vector.
 		arr.pop_back();
 	}
 
@@ -144,26 +129,28 @@ void ford_johnson(std::vector <uint32_t> &arr) {
 		pend.push_back(pairs[i].second);
 	}
 
-	// Insert the first element of pend at the beginning of S.
-	S.insert(S.begin(), pend[0]);
+	// Insert pend[0] to S
+	std::vector<uint32_t>::iterator it = std::lower_bound(S.begin(), S.end(), pend[0]);
+	S.insert(it, pend[0]);
 
-	// Generate Jacobstal sequence for the pend vector.
-	std::vector <size_t> jacobstal_indices = jacobstal_sequence(pend.size());
+	// Generate insertion sequence for the pend vector.
+	std::vector<size_t> insertion_sequence;
+	generate_insertion_sequence(1, pend.size() - 1, insertion_sequence);
 
-	// Insert remaining elements of pend into S using Jacobstal sequence
-	for (size_t i = 1; i < jacobstal_indices.size(); i++) {
-		size_t idx = jacobstal_indices[i];
-
-		// Check if the index is within the range of pend.
+	// Insert remaining elements of pend into S using insertion sequence.
+	for (size_t i = 0; i < insertion_sequence.size(); i++) {
+		size_t idx = insertion_sequence[i];
 		if (idx < pend.size()) {
-			// Insert the element into S in sorted order.
-			S.insert(std::lower_bound(S.begin(), S.end(), pend[idx]), pend[idx]);
+			uint32_t value_to_insert = pend[idx];
+			it = std::lower_bound(S.begin(), S.end(), value_to_insert);
+			S.insert(it, value_to_insert);
 		}
 	}
 
 	// If there was a straggler, insert it into S in sorted order.
 	if (!straggler.empty()) {
-		S.insert(std::lower_bound(S.begin(), S.end(), straggler[0]), straggler[0]);
+		size_t pos = std::lower_bound(S.begin(), S.end(), straggler[0]) - S.begin();
+		S.insert(S.begin() + pos, straggler[0]);
 	}
 
 	// Copy the sorted result back into the original vector.
@@ -232,26 +219,28 @@ void ford_johnson(std::deque <uint32_t> &arr) {
 		pend.push_back(pairs[i].second);
 	}
 
-	// Insert the first element of pend at the beginning of S.
-	S.insert(S.begin(), pend[0]);
+	// Insert pend[0] to S
+	std::deque<uint32_t>::iterator it = std::lower_bound(S.begin(), S.end(), pend[0]);
+	S.insert(it, pend[0]);
 
-	// Generate Jacobstal sequence for the pend deque.
-	std::vector <size_t> jacobstal_indices = jacobstal_sequence(pend.size());
+	// Generate insertion sequence for the pend vector.
+	std::vector<size_t> insertion_sequence;
+	generate_insertion_sequence(1, pend.size() - 1, insertion_sequence);
 
-	// Insert remaining elements of pend into S using Jacobstal sequence
-	for (size_t i = 1; i < jacobstal_indices.size(); i++) {
-		size_t idx = jacobstal_indices[i];
-
-		// Check if the index is within the range of pend.
+	// Insert remaining elements of pend into S using insertion sequence.
+	for (size_t i = 0; i < insertion_sequence.size(); i++) {
+		size_t idx = insertion_sequence[i];
 		if (idx < pend.size()) {
-			// Insert the element into S in sorted order.
-			S.insert(std::lower_bound(S.begin(), S.end(), pend[idx]), pend[idx]);
+			uint32_t value_to_insert = pend[idx];
+			it = std::lower_bound(S.begin(), S.end(), value_to_insert);
+			S.insert(it, value_to_insert);
 		}
 	}
 
 	// If there was a straggler, insert it into S in sorted order.
 	if (!straggler.empty()) {
-		S.insert(std::lower_bound(S.begin(), S.end(), straggler[0]), straggler[0]);
+		size_t pos = std::lower_bound(S.begin(), S.end(), straggler[0]) - S.begin();
+		S.insert(S.begin() + pos, straggler[0]);
 	}
 
 	// Copy the sorted result back into the original deque.

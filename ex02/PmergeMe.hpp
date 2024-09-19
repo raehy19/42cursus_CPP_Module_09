@@ -34,17 +34,6 @@
  */
 uint32_t str_to_uint(const char* str);
 
-/**
- * @brief Generates the Jacobstal sequence up to the nth element.
- *
- * This function generates the Jacobstal sequence up to the nth element.
- * The Jacobstal sequence is a sequence of integers where each element is the sum of
- * the two preceding elements multiplied by two. The first two elements are 0 and 1.
- *
- * @param n The number of elements to generate in the Jacobstal sequence.
- * @return A vector containing the Jacobstal sequence up to the nth element.
- */
-std::vector <size_t> jacobstal_sequence(size_t n);
 
 /**
  * @brief Implements the Ford-Johnson sorting algorithm (Merge-Insertion Sort) for std::vector.
