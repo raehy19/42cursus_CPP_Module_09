@@ -54,7 +54,7 @@ uint32_t str_to_uint(const char *str) {
  * @param right The right index of the sequence.
  * @param sequence The vector to store the generated sequence.
  */
-void generate_insertion_sequence(size_t left, size_t right, std::vector<size_t> &sequence) {
+void generate_insertion_sequence(size_t left, size_t right, std::vector <size_t> &sequence) {
 	if (left > right) return;
 	size_t mid = left + (right - left) / 2;
 	sequence.push_back(mid);
@@ -75,8 +75,24 @@ void generate_insertion_sequence(size_t left, size_t right, std::vector<size_t> 
  */
 void ford_johnson(std::vector <uint32_t> &arr) {
 
-	// Check if the vector is empty.
-	if (arr.empty()) {
+	// Base case: If the vector has 0 or 1 elements, it is already sorted.
+	if (arr.size() <= 1) {
+		return;
+	}
+
+	// Special case: If the vector has up to 16 elements, use insertion sort.
+	if (arr.size() <= 16) {
+
+		// insertion sort
+		for (size_t i = 1; i < arr.size(); i++) {
+			uint32_t key = arr[i];
+			size_t j = i;
+			while (j > 0 && arr[j - 1] > key) {
+				arr[j] = arr[j - 1];
+				j--;
+			}
+			arr[j] = key;
+		}
 		return;
 	}
 
@@ -92,40 +108,30 @@ void ford_johnson(std::vector <uint32_t> &arr) {
 	// Pair consecutive elements and store them in a vector of pairs.
 	std::vector <std::pair<uint32_t, uint32_t> > pairs;
 
-	// Pair consecutive elements.
+	// Pair consecutive elements and sort.
 	for (size_t i = 0; i < arr.size(); i += 2) {
-		pairs.push_back(std::make_pair(arr[i], arr[i + 1]));
-	}
-
-	// Sort each pair so that the first element is always larger.
-	for (size_t i = 0; i < pairs.size(); i++) {
-		if (pairs[i].first < pairs[i].second) {
-			std::swap(pairs[i].first, pairs[i].second);
+		if (arr[i] < arr[i + 1]) {
+			pairs.push_back(std::make_pair(arr[i + 1], arr[i]));
+		} else {
+			pairs.push_back(std::make_pair(arr[i], arr[i + 1]));
 		}
-	}
-
-	// Sort the pairs based on their first elements using an insertion sort.
-	for (size_t i = 1; i < pairs.size(); i++) {
-		std::pair <uint32_t, uint32_t> key = pairs[i];
-
-		size_t j = i;
-
-		// Insert the key pair into the sorted sequence.
-		while (j > 0 && pairs[j - 1].first > key.first) {
-			pairs[j] = pairs[j - 1];
-			j--;
-		}
-		pairs[j] = key;
 	}
 
 	// Separate pairs into two sequences:
 	// 1. S (first elements of each pair)
-	// 2. pend (second elements of each pair)
 	std::vector <uint32_t> S;
-	std::vector <uint32_t> pend;
 
 	for (size_t i = 0; i < pairs.size(); i++) {
 		S.push_back(pairs[i].first);
+	}
+
+	// Sort S using Ford-Johnson algorithm.
+	ford_johnson(S);
+
+	// 2. pend (second elements of each pair)
+	std::vector <uint32_t> pend;
+
+	for (size_t i = 0; i < pairs.size(); i++) {
 		pend.push_back(pairs[i].second);
 	}
 
@@ -134,7 +140,7 @@ void ford_johnson(std::vector <uint32_t> &arr) {
 	S.insert(it, pend[0]);
 
 	// Generate insertion sequence for the pend vector.
-	std::vector<size_t> insertion_sequence;
+	std::vector <size_t> insertion_sequence;
 	generate_insertion_sequence(1, pend.size() - 1, insertion_sequence);
 
 	// Insert remaining elements of pend into S using insertion sequence.
@@ -142,6 +148,7 @@ void ford_johnson(std::vector <uint32_t> &arr) {
 		size_t idx = insertion_sequence[i];
 		if (idx < pend.size()) {
 			uint32_t value_to_insert = pend[idx];
+
 			it = std::lower_bound(S.begin(), S.end(), value_to_insert);
 			S.insert(it, value_to_insert);
 		}
@@ -149,8 +156,8 @@ void ford_johnson(std::vector <uint32_t> &arr) {
 
 	// If there was a straggler, insert it into S in sorted order.
 	if (!straggler.empty()) {
-		size_t pos = std::lower_bound(S.begin(), S.end(), straggler[0]) - S.begin();
-		S.insert(S.begin() + pos, straggler[0]);
+		it = std::lower_bound(S.begin(), S.end(), straggler[0]);
+		S.insert(it, straggler[0]);
 	}
 
 	// Copy the sorted result back into the original vector.
@@ -168,8 +175,24 @@ void ford_johnson(std::vector <uint32_t> &arr) {
  */
 void ford_johnson(std::deque <uint32_t> &arr) {
 
-	// Check if the deque is empty.
-	if (arr.empty()) {
+	// Base case: If the deque has 0 or 1 elements, it is already sorted.
+	if (arr.size() <= 1) {
+		return;
+	}
+
+	// Special case: If the deque has up to 16 elements, use insertion sort.
+	if (arr.size() <= 16) {
+
+		// insertion sort
+		for (size_t i = 1; i < arr.size(); i++) {
+			uint32_t key = arr[i];
+			size_t j = i;
+			while (j > 0 && arr[j - 1] > key) {
+				arr[j] = arr[j - 1];
+				j--;
+			}
+			arr[j] = key;
+		}
 		return;
 	}
 
@@ -185,37 +208,30 @@ void ford_johnson(std::deque <uint32_t> &arr) {
 	// Pair consecutive elements and store them in a deque of pairs.
 	std::deque <std::pair<uint32_t, uint32_t> > pairs;
 
-	// Pair consecutive elements.
+	// Pair consecutive elements and sort.
 	for (size_t i = 0; i < arr.size(); i += 2) {
-		pairs.push_back(std::make_pair(arr[i], arr[i + 1]));
-	}
-
-	// Sort each pair so that the first element is always larger.
-	for (size_t i = 0; i < pairs.size(); i++) {
-		if (pairs[i].first < pairs[i].second) {
-			std::swap(pairs[i].first, pairs[i].second);
+		if (arr[i] < arr[i + 1]) {
+			pairs.push_back(std::make_pair(arr[i + 1], arr[i]));
+		} else {
+			pairs.push_back(std::make_pair(arr[i], arr[i + 1]));
 		}
-	}
-
-	// Sort the pairs based on their first elements using an insertion sort.
-	for (size_t i = 1; i < pairs.size(); i++) {
-		std::pair <uint32_t, uint32_t> key = pairs[i];
-		size_t j = i;
-		while (j > 0 && pairs[j - 1].first > key.first) {
-			pairs[j] = pairs[j - 1];
-			j--;
-		}
-		pairs[j] = key;
 	}
 
 	// Separate pairs into two sequences:
 	// 1. S (first elements of each pair)
-	// 2. pend (second elements of each pair)
 	std::deque <uint32_t> S;
-	std::deque <uint32_t> pend;
 
 	for (size_t i = 0; i < pairs.size(); i++) {
 		S.push_back(pairs[i].first);
+	}
+
+	// Sort the S sequence using Ford-Johnson.
+	ford_johnson(S);
+
+	// 2. pend (second elements of each pair)
+	std::deque <uint32_t> pend;
+
+	for (size_t i = 0; i < pairs.size(); i++) {
 		pend.push_back(pairs[i].second);
 	}
 
@@ -224,7 +240,7 @@ void ford_johnson(std::deque <uint32_t> &arr) {
 	S.insert(it, pend[0]);
 
 	// Generate insertion sequence for the pend vector.
-	std::vector<size_t> insertion_sequence;
+	std::vector <size_t> insertion_sequence;
 	generate_insertion_sequence(1, pend.size() - 1, insertion_sequence);
 
 	// Insert remaining elements of pend into S using insertion sequence.
@@ -232,6 +248,7 @@ void ford_johnson(std::deque <uint32_t> &arr) {
 		size_t idx = insertion_sequence[i];
 		if (idx < pend.size()) {
 			uint32_t value_to_insert = pend[idx];
+
 			it = std::lower_bound(S.begin(), S.end(), value_to_insert);
 			S.insert(it, value_to_insert);
 		}
@@ -239,8 +256,8 @@ void ford_johnson(std::deque <uint32_t> &arr) {
 
 	// If there was a straggler, insert it into S in sorted order.
 	if (!straggler.empty()) {
-		size_t pos = std::lower_bound(S.begin(), S.end(), straggler[0]) - S.begin();
-		S.insert(S.begin() + pos, straggler[0]);
+		it = std::lower_bound(S.begin(), S.end(), straggler[0]);
+		S.insert(it, straggler[0]);
 	}
 
 	// Copy the sorted result back into the original deque.

@@ -26,12 +26,13 @@
  * @param argv Array of argument strings.
  * @return A vector of parsed unsigned integers.
  */
-std::vector<uint32_t> parse_arguments(int argc, char** argv) {
-	std::vector<uint32_t> numbers;
+std::vector <uint32_t> parse_arguments(int argc, char **argv) {
+	std::vector <uint32_t> numbers;
 
 	for (int i = 1; i < argc; i++) {
 		numbers.push_back(str_to_uint(argv[i]));
 	}
+
 	return numbers;
 }
 
@@ -44,11 +45,14 @@ std::vector<uint32_t> parse_arguments(int argc, char** argv) {
  * @param container The container to be sorted.
  * @return The time taken in microseconds.
  */
-template <typename T>
-double measure_sort_time(T& container) {
+template<typename T>
+double measure_sort_time(T &container) {
 	clock_t start_time = clock();
+
 	ford_johnson(container);
+
 	clock_t end_time = clock();
+
 	return static_cast<double>(end_time - start_time) / CLOCKS_PER_SEC * 1e6;
 }
 
@@ -60,8 +64,8 @@ double measure_sort_time(T& container) {
  * @tparam T Container type.
  * @param container The container whose contents to display.
  */
-template <typename T>
-void display_container(const T& container) {
+template<typename T>
+void display_container(const T &container) {
 	typename T::const_iterator it;
 	for (it = container.begin(); it != container.end(); ++it) {
 		std::cout << *it << " ";
@@ -79,15 +83,15 @@ void display_container(const T& container) {
  * @param argv Argument values.
  * @return Exit status.
  */
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
 	if (argc < 2) {
 		std::cerr << "Usage: " << argv[0] << " <numbers>..." << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	try {
-		std::vector<uint32_t> numbers_vector = parse_arguments(argc, argv);
-		std::deque<uint32_t> numbers_deque(numbers_vector.begin(), numbers_vector.end());
+		std::vector <uint32_t> numbers_vector = parse_arguments(argc, argv);
+		std::deque <uint32_t> numbers_deque(numbers_vector.begin(), numbers_vector.end());
 
 		std::cout << "Before: ";
 		display_container(numbers_vector);
@@ -101,7 +105,7 @@ int main(int argc, char** argv) {
 		std::cout << "Time to process with std::vector: " << vector_time << " us" << std::endl;
 		std::cout << "Time to process with std::deque: " << deque_time << " us" << std::endl;
 
-	} catch (const std::exception& e) {
+	} catch (const std::exception &e) {
 		std::cerr << "Error: " << e.what() << std::endl;
 		return EXIT_FAILURE;
 	}
