@@ -16,8 +16,10 @@
 #include <vector>
 #include <deque>
 #include <stdexcept>
-#include <limits.h>
 #include <algorithm>
+#include <cerrno>
+#include <climits>
+#include <limits.h>
 
 /**
  * @brief Converts a string to an unsigned 32-bit integer (uint32_t).

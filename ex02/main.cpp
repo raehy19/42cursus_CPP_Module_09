@@ -12,8 +12,6 @@
 
 #include "PmergeMe.hpp"
 #include <iostream>
-#include <vector>
-#include <deque>
 #include <ctime>
 
 /**
